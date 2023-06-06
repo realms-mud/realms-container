@@ -4,12 +4,8 @@ FROM ubuntu:latest
 
 ENV USER root
 
-RUN echo realms > /etc/hostname
-
-RUN DEBIAN_FRONTEND=noninteractive \
-    apt-get update && apt-get install -y software-properties-common
-
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y \
+    software-properties-common \
     gcc \
     libtool-bin \
     make \
@@ -25,45 +21,29 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
     telnet \
     vim
 
-ENV TZ=America/New_York
-ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get -y install tzdata
-
 RUN echo '[mysqld]\nlog_bin_trust_function_creators = 1\n' \
-    >> /etc/mysql/my.cnf
-
-RUN usermod -d /var/lib/mysql mysql
-RUN service mysql start
-
-RUN mkdir /mud
-
-RUN cd /mud
-
-RUN git clone https://github.com/realms-mud/ldmud.git/ /mud/ldmud
-
-RUN git clone https://github.com/realms-mud/core-lib.git /mud/lib
-
-RUN cp -r /mud/ldmud/mudlib/sys /mud/lib/
-
-RUN cp -r /mud/ldmud/doc /mud/lib/
+    >> /etc/mysql/my.cnf; \
+    usermod -d /var/lib/mysql mysql; \
+    service mysql start
 
 ADD prep-database.pl /mud/prep-database.pl
 ADD create_db.pl /mud/create_db.pl
 ADD driver /mud/driver
 
-RUN chmod 755 /mud/prep-database.pl
-RUN chmod 755 /mud/create_db.pl
-RUN chmod 755 /mud/driver
+RUN mkdir /mud; \
+    cd /mud; \
+    chmod 755 /mud/prep-database.pl /mud/create_db.pl /mud/driver
 
-RUN sed -i 's/user. : NULL/user\) : "RealmsLib"/' /mud/ldmud/src/pkg-mysql.c
+RUN git clone https://github.com/realms-mud/ldmud.git/ /mud/ldmud
 
-RUN sed -i 's/password. : NULL/password\) : "'`/mud/prep-database.pl`'"/' \
+RUN sed -i 's/user. : NULL/user\) : "RealmsLib"/' /mud/ldmud/src/pkg-mysql.c; \
+    sed -i 's/password. : NULL/password\) : "'`/mud/prep-database.pl`'"/' \
     /mud/ldmud/src/pkg-mysql.c
 
 WORKDIR /mud/ldmud/src 
 
-RUN ./autogen.sh
-RUN ./configure --prefix=/mud \
+RUN ./autogen.sh; \
+    ./configure --prefix=/mud \
               --with-read-file-max-size=0 \
               --with-portno=23 \
               --enable-erq=xerq \
@@ -89,9 +69,12 @@ RUN ./configure --prefix=/mud \
               --with-otable-size=65536 \
               --with-hard-malloc-limit=0 \
               --disable-use-pcre \
-              --enable-use-mysql
+              --enable-use-mysql; \
+    make -j 8
 
-RUN make -j 8
+RUN git clone https://github.com/realms-mud/core-lib.git /mud/lib; \
+    cp -r /mud/ldmud/mudlib/sys /mud/lib/; \
+    cp -r /mud/ldmud/doc /mud/lib/
 
 WORKDIR /mud/lib
 
