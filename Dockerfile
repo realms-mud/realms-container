@@ -70,11 +70,16 @@ RUN ./autogen.sh; \
               --with-hard-malloc-limit=0 \
               --disable-use-pcre \
               --enable-use-mysql; \
-    make -j 8
+    make -j 8; \
+    strip ldmud; \
+    rm -rf *.o ../.git*
 
 RUN git clone https://github.com/realms-mud/core-lib.git /mud/lib; \
     cp -r /mud/ldmud/mudlib/sys /mud/lib/; \
-    cp -r /mud/ldmud/doc /mud/lib/
+    cp -r /mud/ldmud/doc /mud/lib/; \
+    mkdir /mud/lib/players; \
+    apt-get clean; \
+    rm -rf /mud/lib/.git* /mud/lib/demo-videos /var/lib/apt/lists/*
 
 WORKDIR /mud/lib
 
