@@ -29,7 +29,7 @@ You can find out which port the mud is exposed on using
 Where you will get output like this:
 ```
 CONTAINER ID   IMAGE     COMMAND                  CREATED             STATUS                          PORTS                   NAMES
-d79c9e7ad5c4   realms    "/bin/sh -c 'service…"   About an hour ago   Up About an hour                0.0.0.0:32768->23/tcp   confident_hawking
+d79c9e7ad5c4   realms    "/bin/sh -c 'service…"   About an hour ago   Up About an hour                0.0.0.0:32768->23/tcp   realms-live
 ```
 In this example, you could telnet to your machine, port 32768 and connect to the mud.
 
