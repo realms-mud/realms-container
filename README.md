@@ -20,11 +20,11 @@ You will see the database start up and the mud load itself
 ```
 You can also run the container such that it exposes the mud outside of Docker by doing this:
 ```
-# docker run -d -P realmsdocker run -d -P realms
+# docker run -dt -P --name realms-live realms
 ```
 You can find out which port the mud is exposed on using 
 ```
-docker run -d -P realms
+# docker ps -f name=realms-live
 ```
 Where you will get output like this:
 ```
@@ -33,11 +33,10 @@ d79c9e7ad5c4   realms    "/bin/sh -c 'service…"   About an hour ago   Up About
 ```
 In this example, you could telnet to your machine, port 32768 and connect to the mud.
 
-## ERRATA
-I am aware of a terminal issue wherein using colors does not format in 
-an even remotely attractive manner if launched from the container. It's annoying
-an ugly. If it bothers you, set the color to "none" either at character creation or
-in game
+Alternatively, you can force realms to run on a specific port like this:
 ```
-> set -p color -v none
+# docker run -dt -p 23:23 --name realms-live realms
 ```
+
+Then, you can just telnet to port 23 / the standard telnet port on your local machine. The caveat with 
+this approach is that you must choose a port that does not currently have a service running on it.
