@@ -4,12 +4,15 @@ FROM ubuntu:latest
 
 ENV USER root
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y \
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
+    apt-get install --no-install-recommends -y \
     software-properties-common \
     gcc \
     libtool-bin \
     make \
     apt-utils \
+    autoconf \
+    automake \
     curl \
     git-core \
     mysql-server \
