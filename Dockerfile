@@ -2,12 +2,12 @@
 
 FROM ubuntu:latest
 
-ENV USER root
+ENV USER=root
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     apt-get install --no-install-recommends -y \
     software-properties-common \
-    gcc \
+    gcc-12 \
     libtool-bin \
     make \
     apt-utils \
@@ -27,7 +27,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
 RUN echo '[mysqld]\nlog_bin_trust_function_creators = 1\n' \
     >> /etc/mysql/my.cnf; \
     usermod -d /var/lib/mysql mysql; \
-    service mysql start
+    /usr/bin/mysqld_safe &
 
 ADD prep-database.pl /mud/prep-database.pl
 ADD create_db.pl /mud/create_db.pl
@@ -35,7 +35,9 @@ ADD driver /mud/driver
 
 RUN mkdir /mud; \
     cd /mud; \
-    chmod 755 /mud/prep-database.pl /mud/create_db.pl /mud/driver
+    chmod 755 /mud/prep-database.pl \
+              /mud/create_db.pl \
+              /mud/driver
 
 RUN git clone https://github.com/realms-mud/ldmud.git/ /mud/ldmud
 
@@ -72,7 +74,7 @@ RUN ./autogen.sh; \
               --with-otable-size=65536 \
               --with-hard-malloc-limit=0 \
               --disable-use-pcre \
-              --enable-use-mysql; \
+              --enable-use-mysql CC=gcc-12; \
     make -j 8; \
     strip ldmud; \
     rm -rf *.o ../.git*
@@ -88,4 +90,4 @@ WORKDIR /mud/lib
 
 EXPOSE 23/tcp
 
-ENTRYPOINT service mysql start && /mud/create_db.pl && /mud/driver && /bin/bash
+ENTRYPOINT ["/bin/bash", "-c", "service mysql start && /mud/create_db.pl && /mud/driver && /bin/bash" ]
